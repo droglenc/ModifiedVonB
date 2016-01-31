@@ -1,3 +1,21 @@
+## Presentation data file
+AFS16-Presentation/matts lwf age data for derek.xlsx
+
+## Old files in the Presentation directory
+AFS16-Presentation/zzzOld/
+
+## Intermediate Beamer files in Presentation Directory
+AFS16-Presentation/Figs/
+AFS16-Presentation/*.aux
+AFS16-Presentation/*.log
+AFS16-Presentation/*.nav
+AFS16-Presentation/*.out
+AFS16-Presentation/*.snm
+AFS16-Presentation/*.tex
+AFS16-Presentation/*.toc
+AFS16-Presentation/*.vrb
+AFS16-Presentation/framed.sty
+
 # History files
 .Rhistory
 .Rapp.history
@@ -11,9 +29,6 @@
 # RStudio files
 .Rproj.user/
 
-# produced vignettes
-vignettes/*.html
-vignettes/*.pdf
-
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
 .httr-oauth
+.Rproj.user
