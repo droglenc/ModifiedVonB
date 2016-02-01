@@ -11,10 +11,6 @@
 \usepackage[authoryear,round]{natbib}
   \bibliographystyle{c:/aaaWork/zGnrlLatex/afs}
   \bibpunct{(}{)}{;}{a}{}{,}
-% allows saving and starting a counter across slides
-\newcounter{resEnumi}
-\newcommand{\saveResEnumi}{\setcounter{resEnumi}{\theenumi}}
-\newcommand{\setResEnumi}{\setcounter{enumi}{\theresEnumi}}
 % reduce footnote size
 \setbeamerfont{footnote}{size=\tiny}
 % allows coloring of tables
@@ -30,12 +26,14 @@
   \endgroup
 }
 \makeatother
+% for bold in equations
+\usepackage{bm}
 
 <<setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE>>=
 #### Some startup R stuff
 
 ## load knitr setup specific for beamer
-source("C:/aaaWork/zGnrlLatex/knitr_beamer_setup.R")
+source("knitr_beamer_setup.R")
 
 ## load packages needed below
 library(FSA)
@@ -66,16 +64,16 @@ calctr <- function(Lr,Linf,K=NULL,t0=NULL) {
 
 % Make a title slide
 \title[Critical Time from Modified VBGF]{Modified von Bertalanffy Growth Function to Directly Estimate the Age at a Critical Length}
-\author[Ogle \& Isermann]{Dr. Derek H. Ogle \inst{1} and Dr. Daniel A. Isermann \inst{2}}
+\author[Ogle \& Isermann]{\textbf{Dr. Derek H. Ogle} \inst{1} and \textbf{Dr. Daniel A. Isermann} \inst{2}}
 \institute[]{\normalsize \inst{1}Mathematical Sciences \& Natural Resources, Northland College \and %
 \inst{2}U. S. Geological Survey, Wisconsin Cooperative Fishery Research Unit,\\ College of Natural Resources, University of Wisconsin-Stevens Point}
-\date[WI AFS 2016]{ \\[2\baselineskip] Wisconsin AFS -- LaCrosse, WI -- 28 February 2016}
+\date[WI AFS 2016]{ \\[2\baselineskip] Wisconsin AFS -- LaCrosse, WI -- 19 February 2016}
 \maketitle
 
 % Setup a TOC that will be repeated at each section
 \AtBeginSection[] {
 \begin{frame}[t]
-\frametitle{Objectives}
+\frametitle{}
 \tableofcontents[currentsection]
 \end{frame}
 }
@@ -170,6 +168,7 @@ arrows(6.7,80,tr[1],0,length=0.1,col="blue")
   \item Undestanding $t_{r}$ is important.
   \pause
   \bigskip
+  \bigskip
 \end{itemize}
 
 \hspace*{-1cm}
@@ -216,12 +215,12 @@ lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
 \begin{itemize}
   \item Foundational value in \textit{yield-per-recruit} and \textit{dynamic pool} models.
   \begin{itemize}
-    \item Commonly used to examine impact of length regulations.
+    \item Commonly used to examine the impact of length regulations.
   \end{itemize}
 \end{itemize}
 \pause
 \begin{center}
-\includegraphics[width=3.5in]{Figs/Isermann-etal-2007.jpg}
+\includegraphics[width=3.7in]{Figs/Isermann-etal-2007.jpg}
 \end{center}
 \end{frame}
 
@@ -245,7 +244,7 @@ lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
 
 %###############################################################################
 %###############################################################################
-\section{Solving for $t_{r}$ by Inverting the VBGF}
+\section{$t_{r}$ Often Estimated by Inverting the VBGF}
 
 \begin{frame}[fragile, t]
 \frametitle{von Bertalanffy Growth Function Review}
@@ -253,28 +252,7 @@ lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
 \[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
 
 \bigskip
-where
-\begin{itemize}
-  \item $L_{t}$ is the average length at age t,
-  \pause
-  \item $L_{\infty}$ is the asymptotic average length,
-  \item $K$ is the Brody growth rate coefficient (units are yr$^{-1}$), and
-  \item $t_{0}$ is the x-intercept.
-\end{itemize}
-
-\end{frame}
-
-
-
-\begin{frame}[fragile, t]
-\frametitle{von Bertalanffy Growth Function Review}
-\begin{itemize}
-  \item $L_{\infty}$ is the asymptotic average length,
-  \item $K$ is the Brody growth rate coefficient (units are yr$^{-1}$), and
-  \item $t_{0}$ is the x-intercept.
-\end{itemize}
-\bigskip
-<<echo=FALSE, fig.width=3.5, fig.height=3.5, out.width='.4\\linewidth'>>=
+<<echo=FALSE, fig.width=3.9, fig.height=3.9, out.width='.47\\linewidth'>>=
 par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 ages <- seq(-2,15,0.1)
 ex4 <- vbtyp(ages,450,0.2,-1)
@@ -296,7 +274,7 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 
 \bigskip
 \begin{itemize}
-  \item The VBGF can be algebraically solved for $t$.
+  \item The \textit{inverse VBGF} is found by algebraically solving the VBGF for $t$.
   \pause
   \bigskip
 
@@ -304,19 +282,16 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 
   \pause
   \bigskip
-  \item This function is called the \textit{inverse VBGF}.
+  \item Then set $L_{t}$ to the chosen $L_{r}$ so that $t$ will be $t_{r}$.
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile, t]
 \frametitle{Computing $t_{r}$ from Inverse VBGF}
-\begin{itemize}
-  \item If a $L_{r}$ is defined, then let $L_{t}=L_{r}$ such that $t$ will be $t_{r}$.
-  \smallskip
 \[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{L_{t}}{L_{\infty}}\right)}{-K} + t_{0} }\]
-  \pause
   \smallskip
+\begin{itemize}
   \item Suppose that $L_{\infty}$=450, $K$=0.2, and $t_{0}$=-1.
   \item Suppose that the critical length of interest is $L_{r}$=300.
   \pause
@@ -358,60 +333,32 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 
 %###############################################################################
 %###############################################################################
-\section{Reparamereterizing the VBGF to Estimate $t_{r}$}
+\section{Reparamereterize the VBGF to Estimate $t_{r}$}
 
 
 \begin{frame}[fragile, t]
-\frametitle{Revist VBGF}
+\frametitle{Revisit (Typical) VBGF}
 \begin{itemize}
 \item The typical VBGF ...
 
 \[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
 
 \bigskip
-\item ... can be rewritten ...
+\item ... may be rewritten as ...
 
 \[\Scale[1.5]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-t_{0})}\right) }\]
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Revist VBGF}
-\vspace{-14pt}
-\[\Scale[1.5]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-t_{0})}\right) }\]
-\vspace{14pt}
-<<redefineA, echo=FALSE, fig.show="hide">>=
-par(mar=c(3.5,3.5,0.5,3.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
-ages <- seq(-2,15,0.1)
-ex4 <- vbtyp(ages,450,0.2,-1)
-plot(ex4~ages,type="l",lwd=3,ylab="Length",xlab="Age",
-     ylim=c(0,Linf),xlim=c(-2,15),yaxt="n")
-axis(2,seq(0,500,100),c(0,NA,200,300,400,500))
-# Mark Linf on plot
-abline(h=450,lwd=2,lty=2,col="gray50")
-axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="gray50",lwd=2)
-@
-<<redefineB, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<redefineA>>
-# Mark t0 on plot
-points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
-axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
-@
-
-\begin{itemize}
-  \item The typical VBGF estimates $t_{0}$ for $L=0$.
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}[fragile, t]
-\frametitle{Revist VBGF}
+\frametitle{Revisit (Original) VBGF}
 \begin{itemize}
 \item The original VBGF (from von Bertalanffy) ...
 
 \[\Scale[1.5]{ L_{t} = L_{0} + (L_{\infty}-L_{0})\left(1-e^{-Kt}\right) }\]
 
+\pause
 \bigskip
 \item ... can be rewritten ...
 
@@ -421,32 +368,51 @@ axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
 
 
 \begin{frame}
-\frametitle{Revist VBGF}
-\vspace{-14pt}
-\[\Scale[1.5]{ L_{t} = L_{0} + (L_{\infty}-L_{0})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
-\vspace{14pt}
-<<redefineC, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<redefineA>>
+\frametitle{Revisit VBGF}
+\vspace{-12pt}
+\begin{itemize}
+\item These VBGFs simply define different points on the same line.
+
+\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
+\[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
+
+\bigskip
+<<pointsOnLineA, echo=FALSE, fig.show="hide">>=
+par(mar=c(3.5,3.5,0.5,3.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+ages <- seq(-2,15,0.1)
+ex4 <- vbtyp(ages,450,0.2,-1)
+plot(ex4~ages,type="l",lwd=3,ylab="Length",xlab="Age",
+     ylim=c(0,Linf),xlim=c(-2,15),yaxt="n",xaxt="n")
+axis(2,seq(0,500,100),c(NA,NA,200,300,400,500))
+axis(1,seq(0,15,5),c(NA,5,10,15))
+# Mark Linf on plot
+abline(h=450,lwd=2,lty=2,col="gray50")
+axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="gray50",lwd=2)
+@
+<<pointsOnLineB, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<pointsOnLineA>>
+# Mark t0 on plot
+points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
+axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
+axis(2,0,0,col.axis="blue",cex.axis=1.25)
 # Mark L0 on plot
 L0 <- vbtyp(0,450,0.2,-1)
 points(0,L0,col="red",pch=19,cex=1,xpd=TRUE)
 axis(2,L0,expression(L[0]),col.axis="red",cex.axis=1.25,padj=0.3)
+axis(1,0,0,col.axis="red",cex.axis=1.25)
 @
-
-\begin{itemize}
-\item The original VBGF estimates $L_{0}$ for $t=0$.
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}
-\frametitle{Revist VBGF}
+\frametitle{Reparameterize VBGF}
 \vspace{-12pt}
 \begin{itemize}
 \item These VBGFs simply define different points on the same line.
 
-\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-t_{0})}\right) }\]
-\[\Scale[1.3]{ L_{t} = L_{0} + (L_{\infty}-L_{0})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
+\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
+\[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
 
 \pause
 \smallskip
@@ -455,7 +421,7 @@ axis(2,L0,expression(L[0]),col.axis="red",cex.axis=1.25,padj=0.3)
   \begin{itemize}
     \item A more general VBGF is
 
-\[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{r}} + (L_{\infty}-\mathcolor{red}{L_{r}})\left(1-e^{-K(t-\mathcolor{red}{t_{r}})}\right) }\]
+\[\Scale[1.3]{ L_{t} = \bm{L_{r}} + (L_{\infty}-\bm{L_{r}})\left(1-e^{-K(t-\bm{t_{r}})}\right) }\]
 
     \pause
     \item where ...
@@ -529,7 +495,7 @@ pred1adj <- cbind(Age=ages,"Pred Len"=(cf[[1]]-Lr)*(1-exp(-cf[[2]]*(ages-cf[[3]]
   \end{itemize}
   \pause
   \bigskip
-  \item Fit traditional and modified VBGF to fish from Big Bay de Noc.
+  \item Fit typical and modified VBGF to fish from Big Bay de Noc.
   \begin{itemize}
     \item Compared parameter estimates and predicted mean lengths-at-age.
   \end{itemize}
@@ -545,7 +511,7 @@ pred1adj <- cbind(Age=ages,"Pred Len"=(cf[[1]]-Lr)*(1-exp(-cf[[2]]*(ages-cf[[3]]
 \frametitle{Comparison of VBGF Results}
 \begin{columns}
 \begin{column}{0.5\textwidth}
-\textbf{Traditional VBGF}
+\textbf{Typical VBGF}
 <<res1typ, echo=FALSE, results="asis">>=
 print(xtable(res1typ),NA.string="-",sanitize.text.function=function(x){x})
 @
@@ -560,7 +526,7 @@ print(xtable(res1typ),NA.string="-",sanitize.text.function=function(x){x})
 \frametitle{Comparison of VBGF Results}
 \begin{columns}
 \begin{column}{0.5\textwidth}
-\textbf{Traditional VBGF}
+\textbf{Typical VBGF}
 <<echo=FALSE, results="asis">>=
 <<res1typ>>
 @
@@ -579,7 +545,7 @@ print(xtable(res1adj),NA.string="-",sanitize.text.function=function(x){x})
 \frametitle{Comparison of VBGF Results}
 \begin{columns}
 \begin{column}{0.5\textwidth}
-\textbf{Traditional VBGF}
+\textbf{Typical VBGF}
 <<echo=FALSE, results="asis">>=
 <<res1typ>>
 @
@@ -752,8 +718,8 @@ plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TR
 \begin{itemize}
   \item A simple modification of the VBGF allows direct estimation of a parameter of interest, $t_{r}$.
   \begin{itemize}
-    \item Same estimates of $L_{\infty}$ and $K$ as with the traditional VBGF.
-    \item Same predicted mean lengths-at-age as with the traditional VBGF.
+    \item Same estimates of $L_{\infty}$ and $K$ as with the typical VBGF.
+    \item Same predicted mean lengths-at-age as with the typical VBGF.
   \end{itemize}
   \pause
   \bigskip
@@ -766,7 +732,7 @@ plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TR
   \smallskip
   \item Costs
   \begin{itemize}
-    \item No direct estimate of $t_{0}$ (in the traditional VBGF).
+    \item No direct estimate of $t_{0}$ (in the typical VBGF).
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -780,7 +746,7 @@ plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TR
 \vspace{0.5in}
 
 \centerline{\begin{minipage}{0.65\textwidth}
-\LARGE Use this modified VBGF in place of the traditional VBGF.
+\LARGE Use this modified VBGF in place of the typical VBGF.
 \end{minipage}}
 \end{frame}
 
