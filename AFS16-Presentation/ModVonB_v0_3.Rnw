@@ -89,7 +89,8 @@ calctr <- function(Lr,Linf,K=NULL,t0=NULL) {
 \begin{itemize}
   \item Critical points in a fish's life are often defined.
   \begin{itemize}
-    \item e.g., age at maturity, recruitment, a length defined by a regulation.
+    \item e.g., age at maturity, recruitment.
+    \item e.g., length defined by a regulation.
   \end{itemize}
 \end{itemize}
 \pause
@@ -98,8 +99,8 @@ calctr <- function(Lr,Linf,K=NULL,t0=NULL) {
   \begin{itemize}
     \item $L_{r}$
     \begin{itemize}
-      \item Length at critical point.
-      \item Defined by scientist.
+      \item Length at the critical point in time.
+      \item Defined by the scientist.
     \end{itemize}
   \end{itemize}
 \end{minipage}%
@@ -131,7 +132,8 @@ arrows(2.7,380,0,Lr,length=0.1,col="blue")
 \begin{itemize}
   \item Critical points in a fish's life are often defined.
   \begin{itemize}
-    \item e.g., age at maturity, recruitment, a length defined by a regulation.
+    \item e.g., age at maturity, recruitment.
+    \item e.g., length defined by a regulation.
   \end{itemize}
 \end{itemize}
 \smallskip
@@ -139,8 +141,8 @@ arrows(2.7,380,0,Lr,length=0.1,col="blue")
   \begin{itemize}
     \item $L_{r}$
     \begin{itemize}
-      \item Length at critical point.
-      \item Defined by scientist.
+      \item Length at the critical point in time.
+      \item Defined by the scientist.
     \end{itemize}
     \smallskip
     \item $t_{r}$
@@ -343,6 +345,7 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 
 \[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
 
+\pause
 \bigskip
 \item ... may be rewritten as ...
 
@@ -360,7 +363,7 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 
 \pause
 \bigskip
-\item ... can be rewritten ...
+\item ... may be rewritten as ...
 
 \[\Scale[1.5]{ L_{t} = L_{0} + (L_{\infty}-L_{0})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
 \end{itemize}
@@ -414,7 +417,6 @@ axis(1,0,0,col.axis="red",cex.axis=1.25)
 \[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
 \[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
 
-\pause
 \smallskip
 \item Can a more useful point on the line be defined?
   \pause
@@ -426,12 +428,12 @@ axis(1,0,0,col.axis="red",cex.axis=1.25)
     \pause
     \item where ...
       \begin{itemize}
-        \item Typical VBGF sets $L_{r}=0$ and estimates $t_{r}=t_{0}$.
-        \item Original VBGF sets $t_{r}=0$ and estimates $L_{r}=L_{0}$.
+        \item Typical VBGF sets $L_{r}=0$ and estimates $t_{r}$ (=$t_{0}$).
+        \item Original VBGF sets $t_{r}=0$ and estimates $L_{r}$ (=$L_{0}$).
       \end{itemize}
     \pause
-    \smallskip
-    \item \textbf{However, we can also set $L_{r}$ to a critical length and estimate $t_{r}$}.
+    \bigskip
+    \item \textbf{However, $L_{r}$ can be set to a critical length to estimate $t_{r}$}.
   \end{itemize}
 \end{itemize}
 \end{frame}
@@ -501,8 +503,8 @@ pred1adj <- cbind(Age=ages,"Pred Len"=(cf[[1]]-Lr)*(1-exp(-cf[[2]]*(ages-cf[[3]]
   \end{itemize}
   \pause
   \smallskip
-  \item Fit modified VBGF to fish from Big Bay de Noc and Green Bay to illustrate $t_{r}$ comparison (following methods in Ogle (2016)\footnotemark).
-  \footnotetext[2]{Ogle, D.H. 2016.  Introductory Fisheries Analyses with R.  CRC Press, Boca Raton, FL.}
+  \item Fit modified VBGF to fish from Big Bay de Noc and Green Bay to illustrate $t_{r}$ comparison.\footnotemark
+  \footnotetext[2]{following methods in Ogle, D.H. 2016.  Introductory Fisheries Analyses with R.  CRC Press, Boca Raton, FL.}
 \end{itemize}
 \end{frame}
 
@@ -622,7 +624,7 @@ rownames(res1) <- rownames(res2) <- c("$L_{\\infty}$","$K$","$t_{480}$")
 \begin{frame}[fragile, t]
 \frametitle{Comparing $t_{r}$ Between Groups}
 \begin{itemize}
-  \item Fit all (8) models where all, two, one, or no parameters differ between the two locations (Big Bay de Noc and Green Bay).
+  \item Fit all (8) models where all, two, one, or no parameters differed between the two locations (Big Bay de Noc and Green Bay).
 \end{itemize}
 \pause
 \bigskip
