@@ -1,4 +1,4 @@
-\documentclass[xcolor=dvipsnames]{beamer}
+\documentclass[xcolor=dvipsnames,t]{beamer}
 % sets the beamer them and color
 \usetheme{CambridgeUS}
 \usecolortheme{seahorse}
@@ -72,7 +72,7 @@ calctr <- function(Lr,Linf,K=NULL,t0=NULL) {
 
 % Setup a TOC that will be repeated at each section
 \AtBeginSection[] {
-\begin{frame}[t]
+\begin{frame}
 \frametitle{}
 \tableofcontents[currentsection]
 \end{frame}
@@ -82,15 +82,15 @@ calctr <- function(Lr,Linf,K=NULL,t0=NULL) {
 
 %###############################################################################
 %###############################################################################
-\section{Critical Time Concept}
+\section{Concept of Critical Times}
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Definitions}
 \begin{itemize}
   \item Critical points in a fish's life are often defined.
   \begin{itemize}
-    \item e.g., age at maturity, recruitment.
-    \item e.g., length defined by a regulation.
+    \item e.g., length or age at maturity or recruitment.
+    \item e.g., length as defined by a regulation (e.g., minimum length limit).
   \end{itemize}
 \end{itemize}
 \pause
@@ -120,20 +120,20 @@ par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 plot(ex1~ages,type="l",lwd=3,ylab="Length",xlab="Age",ylim=c(0,Linf))
 axis(1,12)
 abline(h=Lr,lwd=3,lty=2,col="gray50")
-text(3,400,expression(L[r]),col="blue")
+text(3,400,expression(L[r]),col="blue",cex=1.5)
 arrows(2.7,380,0,Lr,length=0.1,col="blue")
 @
 \end{minipage}%
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Definitions}
 \begin{itemize}
   \item Critical points in a fish's life are often defined.
   \begin{itemize}
-    \item e.g., age at maturity, recruitment.
-    \item e.g., length defined by a regulation.
+    \item e.g., length or age at maturity or recruitment.
+    \item e.g., length as defined by a regulation (e.g., minimum length limit).
   \end{itemize}
 \end{itemize}
 \smallskip
@@ -157,14 +157,14 @@ arrows(2.7,380,0,Lr,length=0.1,col="blue")
 <<defn2, echo=FALSE, fig.width=3.5, fig.height=3.5, out.width='.6\\linewidth'>>=
 <<defn1>>
 lines(c(tr[1],tr[1]),c(-100,Lr),lwd=2,lty=2,col="black")
-text(7,100,expression(t[r]),col="blue")
+text(7,100,expression(t[r]),col="blue",cex=1.5)
 arrows(6.7,80,tr[1],0,length=0.1,col="blue")
 @
 \end{minipage}%
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Importance}
 \begin{itemize}
   \item Undestanding $t_{r}$ is important.
@@ -212,7 +212,7 @@ lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Importance}
 \begin{itemize}
   \item Foundational value in \textit{yield-per-recruit} and \textit{dynamic pool} models.
@@ -227,12 +227,12 @@ lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Importance}
 \begin{itemize}
   \item Foundational value in \textit{yield-per-recruit} and \textit{dynamic pool} models.
   \begin{itemize}
-    \item Commonly used to examine impact of length regulations.
+    \item Commonly used to examine the impact of length regulations.
   \end{itemize}
 \end{itemize}
 
@@ -246,76 +246,42 @@ lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
 
 %###############################################################################
 %###############################################################################
-\section{$t_{r}$ Often Estimated by Inverting the VBGF}
+\section{Critical Time is Often Estimated by Inverting the VBGF}
 
-\begin{frame}[fragile, t]
-\frametitle{von Bertalanffy Growth Function Review}
-
-\[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
-
-\bigskip
-<<echo=FALSE, fig.width=3.9, fig.height=3.9, out.width='.47\\linewidth'>>=
-par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
-ages <- seq(-2,15,0.1)
-ex4 <- vbtyp(ages,450,0.2,-1)
-plot(ex4~ages,type="l",lwd=3,ylab="Length",xlab="Age",ylim=c(0,Linf),xlim=c(-2,15))
-# Mark t0 on plot
-points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
-axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
-# Mark Linf on plot
-abline(h=450,lwd=2,lty=2,col="blue")
-axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=2)
-@
-\end{frame}
-
-
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Inverting the VBGF}
 
 \[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
 
+\pause
 \bigskip
 \begin{itemize}
-  \item The \textit{inverse VBGF} is found by algebraically solving the VBGF for $t$.
+  \item The \textit{inverse VBGF} is found by algebraically solving for $t$.
   \pause
-  \bigskip
-
-\[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{L_{t}}{L_{\infty}}\right)}{-K} + t_{0} }\]
-
-  \pause
-  \bigskip
-  \item Then set $L_{t}$ to the chosen $L_{r}$ so that $t$ will be $t_{r}$.
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile, t]
-\frametitle{Computing $t_{r}$ from Inverse VBGF}
-\[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{L_{t}}{L_{\infty}}\right)}{-K} + t_{0} }\]
   \smallskip
-\begin{itemize}
+
+\[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{L_{t}}{L_{\infty}}\right)}{-K} + t_{0} }\]
+
+  \pause
+  \bigskip
   \item Suppose that $L_{\infty}$=450, $K$=0.2, and $t_{0}$=-1.
-  \item Suppose that the critical length of interest is $L_{r}$=300.
+  \item ... and that the critical length of interest is 300.
   \pause
-  \smallskip
+  \bigskip
 \[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{300}{450}\right)}{-0.2} + -1 = 4.5}\]
-  \pause
-  \smallskip
-  \item Thus, the estimated mean time to reach 300 mm is 4.5 years.
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Computing $t_{r}$ from Inverse VBGF}
 \begin{center}
-{\LARGE That was easy}
+{\LARGE That was easy!}
 \end{center}
 \pause
 \vspace{0.25in}
 \begin{itemize}
   \item \textcolor{red}{BUT} ... how do you compute confidence intervals for $t_{r}$?
-  \pause
   \begin{itemize}
     \item Could use bootstrap, delta method, or error propagation.
     \item Could \emph{try} to fit inverse function and predict $t_{r}$ at $L_{r}$.
@@ -325,7 +291,7 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
   \item \textcolor{red}{BUT} ... how do you compare $t_{r}$ between groups?
 \end{itemize}
 \pause
-\vspace{0.5in}
+\vspace{0.35in}
 \begin{center}
 {\LARGE We need a better method!}
 \end{center}
@@ -335,10 +301,10 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 
 %###############################################################################
 %###############################################################################
-\section{Reparamereterize the VBGF to Estimate $t_{r}$}
+\section{Reparamereterize the VBGF to Estimate Critical Time}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Revisit (Typical) VBGF}
 \begin{itemize}
 \item The typical VBGF ...
@@ -354,7 +320,7 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Revisit (Original) VBGF}
 \begin{itemize}
 \item The original VBGF (from von Bertalanffy) ...
@@ -370,17 +336,14 @@ axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=
 \end{frame}
 
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Revisit VBGF}
 \vspace{-12pt}
 \begin{itemize}
-\item These VBGFs simply define different points on the same line.
-
-\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
-\[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
-
-\bigskip
-<<pointsOnLineA, echo=FALSE, fig.show="hide">>=
+  \item These VBGFs simply define different points on the same line.
+\end{itemize}
+\smallskip
+<<pointsOnLineNULL, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
 par(mar=c(3.5,3.5,0.5,3.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 ages <- seq(-2,15,0.1)
 ex4 <- vbtyp(ages,450,0.2,-1)
@@ -392,49 +355,72 @@ axis(1,seq(0,15,5),c(NA,5,10,15))
 abline(h=450,lwd=2,lty=2,col="gray50")
 axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="gray50",lwd=2)
 @
-<<pointsOnLineB, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<pointsOnLineA>>
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Revisit VBGF}
+\vspace{-12pt}
+\begin{itemize}
+  \item These VBGFs simply define different points on the same line.
+\end{itemize}
+\smallskip
+<<pointsOnLineA, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<pointsOnLineNULL>>
 # Mark t0 on plot
 points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
 axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
 axis(2,0,0,col.axis="blue",cex.axis=1.25)
+@
+\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Revisit VBGF}
+\vspace{-12pt}
+\begin{itemize}
+  \item These VBGFs simply define different points on the same line.
+\end{itemize}
+\smallskip
+<<pointsOnLineB, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<pointsOnLineA>>
 # Mark L0 on plot
 L0 <- vbtyp(0,450,0.2,-1)
 points(0,L0,col="red",pch=19,cex=1,xpd=TRUE)
 axis(2,L0,expression(L[0]),col.axis="red",cex.axis=1.25,padj=0.3)
 axis(1,0,0,col.axis="red",cex.axis=1.25)
 @
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Reparameterize VBGF}
-\vspace{-12pt}
-\begin{itemize}
-\item These VBGFs simply define different points on the same line.
-
 \[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
 \[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
 
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Reparameterize VBGF}
+\vspace{-12pt}
+\begin{itemize}
+  \item Can a more useful point on the line be defined?
+\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
+\[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
+
+\pause
 \smallskip
-\item Can a more useful point on the line be defined?
+
+  \item A more general VBGF is
+
+\[\Scale[1.5]{ L_{t} = \bm{L_{r}} + (L_{\infty}-\bm{L_{r}})\left(1-e^{-K(t-\bm{t_{r}})}\right) }\]
+
   \pause
   \begin{itemize}
-    \item A more general VBGF is
-
-\[\Scale[1.3]{ L_{t} = \bm{L_{r}} + (L_{\infty}-\bm{L_{r}})\left(1-e^{-K(t-\bm{t_{r}})}\right) }\]
-
-    \pause
     \item where ...
       \begin{itemize}
-        \item Typical VBGF sets $L_{r}=0$ and estimates $t_{r}$ (=$t_{0}$).
-        \item Original VBGF sets $t_{r}=0$ and estimates $L_{r}$ (=$L_{0}$).
+        \item Typical VBGF sets $L_{r}=\mathcolor{blue}{0}$ and estimates $t_{r}$ (=$\mathcolor{blue}{t_{0}}$).
+        \item Original VBGF sets $t_{r}=\mathcolor{red}{0}$ and estimates $L_{r}$ (=$\mathcolor{red}{L_{0}}$).
       \end{itemize}
+    \end{itemize}
     \pause
-    \bigskip
-    \item \textbf{However, $L_{r}$ can be set to a critical length to estimate $t_{r}$}.
-  \end{itemize}
+    \medskip
+  \item \textbf{Importantly, $\bm{L_{r}}$ can be set to a critical length to estimate $\bm{t_{r}}$}.
 \end{itemize}
 \end{frame}
 
@@ -484,7 +470,7 @@ pred1adj <- cbind(Age=ages,"Pred Len"=(cf[[1]]-Lr)*(1-exp(-cf[[2]]*(ages-cf[[3]]
 @
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Example with Lake Michigan Lake Whitefish}
 \begin{itemize}
   \item Data from Belnap (2014).\footnotemark
@@ -509,7 +495,7 @@ pred1adj <- cbind(Age=ages,"Pred Len"=(cf[[1]]-Lr)*(1-exp(-cf[[2]]*(ages-cf[[3]]
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Comparison of VBGF Results}
 \begin{columns}
 \begin{column}{0.5\textwidth}
@@ -524,7 +510,7 @@ print(xtable(res1typ),NA.string="-",sanitize.text.function=function(x){x})
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Comparison of VBGF Results}
 \begin{columns}
 \begin{column}{0.5\textwidth}
@@ -543,7 +529,7 @@ print(xtable(res1adj),NA.string="-",sanitize.text.function=function(x){x})
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Comparison of VBGF Results}
 \begin{columns}
 \begin{column}{0.5\textwidth}
@@ -621,7 +607,7 @@ rownames(res1) <- rownames(res2) <- c("$L_{\\infty}$","$K$","$t_{480}$")
 @
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Comparing $t_{r}$ Between Groups}
 \begin{itemize}
   \item Fit all (8) models where all, two, one, or no parameters differed between the two locations (Big Bay de Noc and Green Bay).
@@ -636,7 +622,7 @@ print(xtable(sumAIC,digits=c(0,0,0,1,2,2)),include.rownames=FALSE,
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Comparing $t_{r}$ Between Groups}
 \begin{columns}
 \begin{column}{0.5\textwidth}
@@ -657,8 +643,9 @@ print(xtable(res2),sanitize.text.function=function(x){x},
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Comparing $t_{r}$ Between Groups}
+\vspace{-6pt}
 \begin{columns}
 \begin{column}{0.5\textwidth}
 \textbf{Big Bay de Noc}
@@ -712,13 +699,13 @@ plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TR
 %###############################################################################
 \section{Summary}
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Summary}
 \vspace{-14pt}
 \[\Scale[1.5]{ L_{t} = L_{r} + \left(L_{\infty}-L_{r}\right)\left(1-e^{-K(t-t_{r})}\right) }\]
 \bigskip
 \begin{itemize}
-  \item A simple modification of the VBGF allows direct estimation of a parameter of interest, $t_{r}$.
+  \item A simple modification of the VBGF allows direct estimation of $t_{r}$.
   \begin{itemize}
     \item Same estimates of $L_{\infty}$ and $K$ as with the typical VBGF.
     \item Same predicted mean lengths-at-age as with the typical VBGF.
@@ -734,13 +721,13 @@ plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TR
   \smallskip
   \item Costs
   \begin{itemize}
-    \item No direct estimate of $t_{0}$ (in the typical VBGF).
+    \item No direct estimate of $t_{0}$ (from the typical VBGF).
   \end{itemize}
 \end{itemize}
 \end{frame}
 
 
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Recommendation}
 \vspace{-14pt}
 \[\Scale[1.5]{ L_{t} = L_{r} + \left(L_{\infty}-L_{r}\right)\left(1-e^{-K(t-t_{r})}\right) } \]
@@ -757,7 +744,7 @@ plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TR
 %###############################################################################
 %###############################################################################
 \section*{Acknowledgments}
-\begin{frame}[fragile, t]
+\begin{frame}[fragile]
 \frametitle{Acknowledgments}
 \begin{itemize}
   \item Matthew Belnap for collection and initial processing of Whitefish data.
@@ -773,140 +760,6 @@ plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TR
 %###############################################################################
 \section*{Thanks}
 \begin{frame}[plain]
-\end{frame}
-
-
-
-
-%###############################################################################
-%###############################################################################
-\section*{Alternative Explanation}
-
-\begin{frame}[fragile, t]
-\frametitle{Revisit $t_{0}$}
-  \vspace{-6pt}
-  \begin{itemize}
-    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
-  \end{itemize}
-
-<<redefine1, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-par(mar=c(3.5,3.5,0.5,3.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
-ages <- seq(-2,15,0.1)
-ex4 <- vbtyp(ages,450,0.2,-1)
-plot(ex4~ages,type="l",lwd=3,ylab="Length",xlab="Age",ylim=c(0,Linf),xlim=c(-2,15))
-# Mark t0 on plot
-points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
-axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
-# Mark Linf on plot
-abline(h=450,lwd=2,lty=2,col="blue")
-axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=2)
-@
-\end{frame}
-
-
-\begin{frame}[fragile, t]
-\frametitle{Revisit $t_{0}$}
-  \vspace{-6pt}
-  \begin{itemize}
-    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
-  \end{itemize}
-<<redefine2, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<redefine1>>
-@
-  \begin{itemize}
-    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile, t]
-\frametitle{Revisit $t_{0}$}
-  \vspace{-6pt}
-  \begin{itemize}
-    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
-  \end{itemize}
-<<redefine3, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<redefine2>>
-## Make new axis and mark new values
-Lr <- 250
-axis(2,Lr,expression(L[r]),cex.axis=1.25,col="red",col.axis="red",lwd=2)
-abline(h=Lr,lwd=2,lty=2,col="red")
-axis(4,axTicks(2),axTicks(2)-Lr)
-mtext("Length - Crit. Length",side=4,line=2.1,las=3)
-@
-  \begin{itemize}
-    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile, t]
-\frametitle{Revisit $t_{0}$}
-  \vspace{-6pt}
-  \begin{itemize}
-    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
-  \end{itemize}
-<<redefine4, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<redefine3>>
-axis(4,Lr,0,cex.axis=1.25,col="red",col.axis="red",lwd=2)
-@
-  \begin{itemize}
-    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
-    \item Thus, $Y=0$ means that $L^{*}_{t}=0$, $L_{t}-L_{r}=0$, and $L_{t}=L_{r}$.
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile, t]
-\frametitle{Revisit $t_{0}$}
-  \vspace{-6pt}
-  \begin{itemize}
-    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
-  \end{itemize}
-<<redefine5, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<redefine4>>
-tr <- calctr(Lr,450,0.2,-1)
-lines(c(tr,tr),c(0,Lr),lwd=2,lty=2,col="red")
-axis(1,tr,expression(t[0]),cex.axis=1.25,col="red",col.axis="red",lwd=2)
-axis(1,tr,expression(t[r]),line=1.5,cex.axis=1.25,col="red",col.axis="red",lwd=2)
-@
-  \begin{itemize}
-    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
-    \item Thus, $Y=0$ means that $L^{*}_{t}=0$, $L_{t}-L_{r}=0$, and $L_{t}=L_{r}$.
-    \item Thus, when using $L^{*}_{t}$, $t_{0} = t_{r}$.
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[fragile, t]
-\frametitle{Modified VBGF}
-\begin{itemize}
-  \item Therefore, this simple adjustment allows direction estimation of $t_{r}$.
-\end{itemize}
-
-\[\Scale[1.5]{ L_{t}-L_{r} = L_{\infty}\left(1-e^{-K(t-t_{r})}\right) }\]
-
-\[\Scale[1.5]{ L_{t} = L_{r} + L_{\infty}\left(1-e^{-K(t-t_{r})}\right) }\]
-
-\end{frame}
-
-
-\begin{frame}[fragile, t]
-\frametitle{Modified VBGF}
-\begin{itemize}
-  \item However, $L_{\infty}$ is now incorrect.
-\end{itemize}
-
-<<redefine6, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
-<<redefine5>>
-@
-\pause
-\begin{itemize}
-  \item But this is easily corrected.
-\end{itemize}
-
-\[\Scale[1.5]{ L_{t} = L_{r} + \left(L_{\infty}-L_{r}\right)\left(1-e^{-K(t-t_{r})}\right) }\]
-
 \end{frame}
 
 \end{document}
