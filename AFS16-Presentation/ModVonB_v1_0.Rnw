@@ -257,7 +257,6 @@ lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
 \bigskip
 \begin{itemize}
   \item The VBGF is inverted by algebraically solving for $t$.
-  \pause
   \smallskip
 
 \[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{L_{t}}{L_{\infty}}\right)}{-K} + t_{0} }\]
