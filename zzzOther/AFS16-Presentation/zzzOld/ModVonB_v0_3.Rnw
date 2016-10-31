@@ -1,0 +1,912 @@
+\documentclass[xcolor=dvipsnames]{beamer}
+% sets the beamer them and color
+\usetheme{CambridgeUS}
+\usecolortheme{seahorse}
+% turns off navigation bar
+\beamertemplatenavigationsymbolsempty
+% allows inclusion of graphics and makes equations larger
+\usepackage{graphicx}
+\newcommand*{\Scale}[2][4]{\scalebox{#1}{\ensuremath{#2}}}%
+% uses my custom bibliography style
+\usepackage[authoryear,round]{natbib}
+  \bibliographystyle{c:/aaaWork/zGnrlLatex/afs}
+  \bibpunct{(}{)}{;}{a}{}{,}
+% reduce footnote size
+\setbeamerfont{footnote}{size=\tiny}
+% allows coloring of tables
+\usepackage{colortbl}
+\definecolor{light-gray}{gray}{0.95}
+% for color in equations
+\makeatletter
+\def\mathcolor#1#{\@mathcolor{#1}}
+\def\@mathcolor#1#2#3{%
+  \protect\leavevmode
+  \begingroup
+    \color#1{#2}#3%
+  \endgroup
+}
+\makeatother
+% for bold in equations
+\usepackage{bm}
+
+<<setup, echo=FALSE, results='hide', message=FALSE, warning=FALSE>>=
+#### Some startup R stuff
+
+## load knitr setup specific for beamer
+source("knitr_beamer_setup.R")
+
+## load packages needed below
+library(FSA)
+library(nlstools)
+library(xtable)
+library(readxl)
+library(magrittr)
+library(dplyr)
+library(minpack.lm)
+library(AICcmodavg)
+library(plotrix)
+
+## setup function to compute tr
+calctr <- function(Lr,Linf,K=NULL,t0=NULL) {
+  if (length(Linf)==3) { K <- Linf[[2]]
+                         t0 <- Linf[[3]]
+                         Linf <- Linf[[1]] }
+  (log(1-Lr/Linf))/(-K)+t0
+}
+@
+
+
+
+%###############################################################################
+%###############################################################################
+% Start the document.
+\begin{document}
+
+% Make a title slide
+\title[Critical Time from Modified VBGF]{Modified von Bertalanffy Growth Function to Directly Estimate the Age at a Critical Length}
+\author[Ogle \& Isermann]{\textbf{Dr. Derek H. Ogle} \inst{1} and \textbf{Dr. Daniel A. Isermann} \inst{2}}
+\institute[]{\normalsize \inst{1}Mathematical Sciences \& Natural Resources, Northland College \and %
+\inst{2}U. S. Geological Survey, Wisconsin Cooperative Fishery Research Unit,\\ College of Natural Resources, University of Wisconsin-Stevens Point}
+\date[WI AFS 2016]{ \\[2\baselineskip] Wisconsin AFS -- LaCrosse, WI -- 19 February 2016}
+\maketitle
+
+% Setup a TOC that will be repeated at each section
+\AtBeginSection[] {
+\begin{frame}[t]
+\frametitle{}
+\tableofcontents[currentsection]
+\end{frame}
+}
+
+
+
+%###############################################################################
+%###############################################################################
+\section{Critical Time Concept}
+
+\begin{frame}[fragile, t]
+\frametitle{Definitions}
+\begin{itemize}
+  \item Critical points in a fish's life are often defined.
+  \begin{itemize}
+    \item e.g., age at maturity, recruitment.
+    \item e.g., length defined by a regulation.
+  \end{itemize}
+\end{itemize}
+\pause
+\smallskip
+\begin{minipage}[t]{0.6\textwidth}
+  \begin{itemize}
+    \item $L_{r}$
+    \begin{itemize}
+      \item Length at the critical point in time.
+      \item Defined by the scientist.
+    \end{itemize}
+  \end{itemize}
+\end{minipage}%
+\hspace*{-2cm}
+\begin{minipage}[t]{0.7\textwidth}
+<<defn1, echo=FALSE, fig.width=3.5, fig.height=3.5, out.width='.6\\linewidth'>>=
+vbtyp <- vbFuns("Typical")
+ages <- seq(0,15,0.1)
+Linf <- 500
+t0 <- -0.5
+K <- c(0.2,0.1)
+ex1 <- vbtyp(ages,Linf,K[1],t0)
+ex2 <- vbtyp(ages,Linf,K[2],t0)
+Lr <- 300
+tr <- calctr(Lr,Linf,K,t0)
+par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+plot(ex1~ages,type="l",lwd=3,ylab="Length",xlab="Age",ylim=c(0,Linf))
+axis(1,12)
+abline(h=Lr,lwd=3,lty=2,col="gray50")
+text(3,400,expression(L[r]),col="blue")
+arrows(2.7,380,0,Lr,length=0.1,col="blue")
+@
+\end{minipage}%
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Definitions}
+\begin{itemize}
+  \item Critical points in a fish's life are often defined.
+  \begin{itemize}
+    \item e.g., age at maturity, recruitment.
+    \item e.g., length defined by a regulation.
+  \end{itemize}
+\end{itemize}
+\smallskip
+\begin{minipage}[t]{0.6\textwidth}
+  \begin{itemize}
+    \item $L_{r}$
+    \begin{itemize}
+      \item Length at the critical point in time.
+      \item Defined by the scientist.
+    \end{itemize}
+    \smallskip
+    \item $t_{r}$
+    \begin{itemize}
+      \item Age (time) at the critical point.
+      \item To be estimated.
+    \end{itemize}
+  \end{itemize}
+\end{minipage}%
+\hspace*{-2cm}
+\begin{minipage}[t]{0.7\textwidth}
+<<defn2, echo=FALSE, fig.width=3.5, fig.height=3.5, out.width='.6\\linewidth'>>=
+<<defn1>>
+lines(c(tr[1],tr[1]),c(-100,Lr),lwd=2,lty=2,col="black")
+text(7,100,expression(t[r]),col="blue")
+arrows(6.7,80,tr[1],0,length=0.1,col="blue")
+@
+\end{minipage}%
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Importance}
+\begin{itemize}
+  \item Undestanding $t_{r}$ is important.
+  \pause
+  \bigskip
+  \bigskip
+\end{itemize}
+
+\hspace*{-1cm}
+\begin{minipage}{0.7\textwidth}
+<<echo=FALSE, fig.width=3.5, fig.height=3.5>>=
+vbtyp <- vbFuns("Typical")
+ages <- seq(0,15,0.1)
+Linf <- 500
+t0 <- -0.5
+K <- c(0.2,0.1)
+ex1 <- vbtyp(ages,Linf,K[1],t0)
+ex2 <- vbtyp(ages,Linf,K[2],t0)
+Lr <- 300
+tr <- calctr(Lr,Linf,K,t0)
+par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+plot(ex1~ages,type="l",lwd=3,ylab="Length",xlab="Age",ylim=c(0,Linf))
+axis(1,12)
+lines(ex2~ages,lwd=3,col="red")
+abline(h=Lr,lwd=3,lty=2,col="gray50")
+lines(c(tr[1],tr[1]),c(-100,Lr),lwd=2,lty=2,col="black")
+lines(c(tr[2],tr[2]),c(-100,Lr),lwd=2,lty=2,col="red")
+@
+\end{minipage}%
+\pause
+\hspace*{-3cm}
+\begin{minipage}{0.7\textwidth}
+<<echo=FALSE, fig.width=3.5, fig.height=3.5>>=
+par(mar=c(3.5,3.5,0.25,0.25),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+ages <- seq(0,15,0.1)
+ex3 <- 1000*exp(-0.2*ages)
+ab <- 1000*exp(-0.2*tr)
+plot(ex3~ages,type="l",lwd=3,ylab="Abundance",xlab="Age",ylim=c(0,1000))
+axis(1,c(0,12))
+lines(ex3~ages,lwd=1,col="red")
+lines(c(tr[1],tr[1],-10),c(-100,ab[1],ab[1]),lwd=2,lty=2,col="black")
+lines(c(tr[2],tr[2],-10),c(-100,ab[2],ab[2]),lwd=2,lty=2,col="red")
+@
+\end{minipage}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Importance}
+\begin{itemize}
+  \item Foundational value in \textit{yield-per-recruit} and \textit{dynamic pool} models.
+  \begin{itemize}
+    \item Commonly used to examine the impact of length regulations.
+  \end{itemize}
+\end{itemize}
+\pause
+\begin{center}
+\includegraphics[width=3.7in]{Figs/Isermann-etal-2007.jpg}
+\end{center}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Importance}
+\begin{itemize}
+  \item Foundational value in \textit{yield-per-recruit} and \textit{dynamic pool} models.
+  \begin{itemize}
+    \item Commonly used to examine impact of length regulations.
+  \end{itemize}
+\end{itemize}
+
+\smallskip
+
+\begin{center}
+\includegraphics[width=4.7in]{Figs/tr-examples.jpg}
+\end{center}
+\end{frame}
+
+
+%###############################################################################
+%###############################################################################
+\section{$t_{r}$ Often Estimated by Inverting the VBGF}
+
+\begin{frame}[fragile, t]
+\frametitle{von Bertalanffy Growth Function Review}
+
+\[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
+
+\bigskip
+<<echo=FALSE, fig.width=3.9, fig.height=3.9, out.width='.47\\linewidth'>>=
+par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+ages <- seq(-2,15,0.1)
+ex4 <- vbtyp(ages,450,0.2,-1)
+plot(ex4~ages,type="l",lwd=3,ylab="Length",xlab="Age",ylim=c(0,Linf),xlim=c(-2,15))
+# Mark t0 on plot
+points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
+axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
+# Mark Linf on plot
+abline(h=450,lwd=2,lty=2,col="blue")
+axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=2)
+@
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Inverting the VBGF}
+
+\[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
+
+\bigskip
+\begin{itemize}
+  \item The \textit{inverse VBGF} is found by algebraically solving the VBGF for $t$.
+  \pause
+  \bigskip
+
+\[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{L_{t}}{L_{\infty}}\right)}{-K} + t_{0} }\]
+
+  \pause
+  \bigskip
+  \item Then set $L_{t}$ to the chosen $L_{r}$ so that $t$ will be $t_{r}$.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Computing $t_{r}$ from Inverse VBGF}
+\[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{L_{t}}{L_{\infty}}\right)}{-K} + t_{0} }\]
+  \smallskip
+\begin{itemize}
+  \item Suppose that $L_{\infty}$=450, $K$=0.2, and $t_{0}$=-1.
+  \item Suppose that the critical length of interest is $L_{r}$=300.
+  \pause
+  \smallskip
+\[\Scale[1.5]{ t = \frac{log_{e}\left(1-\frac{300}{450}\right)}{-0.2} + -1 = 4.5}\]
+  \pause
+  \smallskip
+  \item Thus, the estimated mean time to reach 300 mm is 4.5 years.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Computing $t_{r}$ from Inverse VBGF}
+\begin{center}
+{\LARGE That was easy}
+\end{center}
+\pause
+\vspace{0.25in}
+\begin{itemize}
+  \item \textcolor{red}{BUT} ... how do you compute confidence intervals for $t_{r}$?
+  \pause
+  \begin{itemize}
+    \item Could use bootstrap, delta method, or error propagation.
+    \item Could \emph{try} to fit inverse function and predict $t_{r}$ at $L_{r}$.
+  \end{itemize}
+  \pause
+  \bigskip
+  \item \textcolor{red}{BUT} ... how do you compare $t_{r}$ between groups?
+\end{itemize}
+\pause
+\vspace{0.5in}
+\begin{center}
+{\LARGE We need a better method!}
+\end{center}
+\end{frame}
+
+
+
+%###############################################################################
+%###############################################################################
+\section{Reparamereterize the VBGF to Estimate $t_{r}$}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Revisit (Typical) VBGF}
+\begin{itemize}
+\item The typical VBGF ...
+
+\[\Scale[1.5]{ L_{t} = L_{\infty}\left(1-e^{-K(t-t_{0})}\right) }\]
+
+\pause
+\bigskip
+\item ... may be rewritten as ...
+
+\[\Scale[1.5]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-t_{0})}\right) }\]
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Revisit (Original) VBGF}
+\begin{itemize}
+\item The original VBGF (from von Bertalanffy) ...
+
+\[\Scale[1.5]{ L_{t} = L_{0} + (L_{\infty}-L_{0})\left(1-e^{-Kt}\right) }\]
+
+\pause
+\bigskip
+\item ... may be rewritten as ...
+
+\[\Scale[1.5]{ L_{t} = L_{0} + (L_{\infty}-L_{0})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Revisit VBGF}
+\vspace{-12pt}
+\begin{itemize}
+\item These VBGFs simply define different points on the same line.
+
+\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
+\[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
+
+\bigskip
+<<pointsOnLineA, echo=FALSE, fig.show="hide">>=
+par(mar=c(3.5,3.5,0.5,3.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+ages <- seq(-2,15,0.1)
+ex4 <- vbtyp(ages,450,0.2,-1)
+plot(ex4~ages,type="l",lwd=3,ylab="Length",xlab="Age",
+     ylim=c(0,Linf),xlim=c(-2,15),yaxt="n",xaxt="n")
+axis(2,seq(0,500,100),c(NA,NA,200,300,400,500))
+axis(1,seq(0,15,5),c(NA,5,10,15))
+# Mark Linf on plot
+abline(h=450,lwd=2,lty=2,col="gray50")
+axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="gray50",lwd=2)
+@
+<<pointsOnLineB, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<pointsOnLineA>>
+# Mark t0 on plot
+points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
+axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
+axis(2,0,0,col.axis="blue",cex.axis=1.25)
+# Mark L0 on plot
+L0 <- vbtyp(0,450,0.2,-1)
+points(0,L0,col="red",pch=19,cex=1,xpd=TRUE)
+axis(2,L0,expression(L[0]),col.axis="red",cex.axis=1.25,padj=0.3)
+axis(1,0,0,col.axis="red",cex.axis=1.25)
+@
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Reparameterize VBGF}
+\vspace{-12pt}
+\begin{itemize}
+\item These VBGFs simply define different points on the same line.
+
+\[\Scale[1.3]{ L_{t} = \mathcolor{blue}{0} + (L_{\infty}-\mathcolor{blue}{0})\left(1-e^{-K(t-\mathcolor{blue}{t_{0}})}\right) }\]
+\[\Scale[1.3]{ L_{t} = \mathcolor{red}{L_{0}} + (L_{\infty}-\mathcolor{red}{L_{0}})\left(1-e^{-K(t-\mathcolor{red}{0})}\right) }\]
+
+\smallskip
+\item Can a more useful point on the line be defined?
+  \pause
+  \begin{itemize}
+    \item A more general VBGF is
+
+\[\Scale[1.3]{ L_{t} = \bm{L_{r}} + (L_{\infty}-\bm{L_{r}})\left(1-e^{-K(t-\bm{t_{r}})}\right) }\]
+
+    \pause
+    \item where ...
+      \begin{itemize}
+        \item Typical VBGF sets $L_{r}=0$ and estimates $t_{r}$ (=$t_{0}$).
+        \item Original VBGF sets $t_{r}=0$ and estimates $L_{r}$ (=$L_{0}$).
+      \end{itemize}
+    \pause
+    \bigskip
+    \item \textbf{However, $L_{r}$ can be set to a critical length to estimate $t_{r}$}.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+%###############################################################################
+%###############################################################################
+\section{An Example with Lake Michigan Lake Whitefish}
+<<echo=FALSE, results="hide", warning=FALSE, message=FALSE>>=
+## Get data
+##   needed to address one problem with BBN level and Northern
+##   renamed the age and "annuli+1" variables (so that annuli+1
+##   will be used below)
+df <- read_excel("matts lwf age data for derek.xlsx") %>%
+  mutate(Stock=mapvalues(Stock,from=c("BBN   ","orthern"),to=c("BBN","Northern")),
+         Stock=factor(Stock)) %>%
+  rename(Annuli=Age,Age=`Age (annuli+1)`)
+## Isolated BBN and WI2
+df1 <- filterD(df,Stock=="BBN")
+df2 <- filterD(df,Stock %in% c("BBN","GreenBay"))
+@
+<<echo=FALSE, results="hide", warning=FALSE, message=FALSE>>=
+## Fit the Models
+Lr <- 0
+vb <- TL~(Linf-Lr)*(1-exp(-K*(Age-t0)))+Lr
+# Typical model
+typ1 <- nlsLM(vb,data=df1,start=list(Linf=550,K=0.3,t0=-0.5))
+Lr <- 480
+tr1 <- calctr(Lr,coef(typ1))
+# Typical model but with adjustment
+adj1 <- nlsLM(vb,data=df1,start=list(Linf=550,K=0.3,t0=-0.5))
+
+## Put together tabular results
+res1typ <- cbind(coef(typ1),confint(typ1))
+res1typ <- rbind(res1typ,c(tr1,NA,NA))
+res1adj <- cbind(coef(adj1),confint(adj1))
+res1adj <- rbind(res1adj,c(NA,NA,NA))[c(1,2,4,3),]
+colnames(res1typ) <- colnames(res1adj) <- c("Estimate","LCI","UCI")
+rownames(res1typ) <- rownames(res1adj) <- c("$L_{\\infty}$","$K$","$t_{0}$","$t_{480}$")
+
+## Predicted lengths at age
+ages <- c(8,15,25,9.8845)
+cf <- coef(typ1)
+pred1typ <- cbind(Age=ages,"Pred Len"=cf[[1]]*(1-exp(-cf[[2]]*(ages-cf[[3]]))))
+cf <- coef(adj1)
+pred1adj <- cbind(Age=ages,"Pred Len"=(cf[[1]]-Lr)*(1-exp(-cf[[2]]*(ages-cf[[3]])))+Lr)
+@
+
+
+\begin{frame}[fragile, t]
+\frametitle{Example with Lake Michigan Lake Whitefish}
+\begin{itemize}
+  \item Data from Belnap (2014).\footnotemark
+  \footnotetext[1]{Belnap, M.J. 2014. Stock Characteristics of Lake Whitefish in Lake Michigan. M.Sc. Thesis, Univ. Wis. - Stevens Point.}
+  \begin{itemize}
+    \item Fish from commercial trapnets in six management zones.
+    \item Measured total length (TL; mm).
+    \item Estimated age (yrs) from otolith thin sections.
+    \item Interested in $t_{480}$ (480 mm is length at full vulnerability to harvest).
+  \end{itemize}
+  \pause
+  \bigskip
+  \item Fit typical and modified VBGF to fish from Big Bay de Noc.
+  \begin{itemize}
+    \item Compared parameter estimates and predicted mean lengths-at-age.
+  \end{itemize}
+  \pause
+  \smallskip
+  \item Fit modified VBGF to fish from Big Bay de Noc and Green Bay to illustrate $t_{r}$ comparison.\footnotemark
+  \footnotetext[2]{following methods in Ogle, D.H. 2016.  Introductory Fisheries Analyses with R.  CRC Press, Boca Raton, FL.}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Comparison of VBGF Results}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Typical VBGF}
+<<res1typ, echo=FALSE, results="asis">>=
+print(xtable(res1typ),NA.string="-",sanitize.text.function=function(x){x})
+@
+\end{column}
+\begin{column}{0.5\textwidth}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Comparison of VBGF Results}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Typical VBGF}
+<<echo=FALSE, results="asis">>=
+<<res1typ>>
+@
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Modified VBGF}
+<<res1adj, echo=FALSE, results="asis">>=
+print(xtable(res1adj),NA.string="-",sanitize.text.function=function(x){x})
+@
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Comparison of VBGF Results}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Typical VBGF}
+<<echo=FALSE, results="asis">>=
+<<res1typ>>
+@
+\smallskip
+<<echo=FALSE, results="asis">>=
+print(xtable(pred1typ,digits=c(0,2,2)),include.rownames=FALSE)
+@
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Modified VBGF}
+<<echo=FALSE, results="asis">>=
+<<res1adj>>
+@
+\smallskip
+<<echo=FALSE, results="asis">>=
+print(xtable(pred1adj,digits=c(0,2,2)),include.rownames=FALSE)
+@
+\end{column}
+\end{columns}
+\end{frame}
+
+<<echo=FALSE, results="hide", message=FALSE, warning=FALSE>>=
+Lr <- 480
+sv0 <- list(Linf=550,K=0.25,tr=10.3)
+
+svGen <- Map(rep,sv0,c(2,2,2))
+vbGen <- TL~(Linf[Stock]-Lr)*(1-exp(-K[Stock]*(Age-tr[Stock])))+Lr
+fitGen <- nls(vbGen,data=df2,start=svGen)
+
+svLK <- Map(rep,sv0,c(2,2,1))
+vbLK <- TL~(Linf[Stock]-Lr)*(1-exp(-K[Stock]*(Age-tr)))+Lr
+fitLK <- nls(vbLK,data=df2,start=svLK)
+
+svLT <- Map(rep,sv0,c(2,1,2))
+vbLT <- TL~(Linf[Stock]-Lr)*(1-exp(-K*(Age-tr[Stock])))+Lr
+fitLT <- nls(vbLT,data=df2,start=svLT)
+
+svKT <- Map(rep,sv0,c(1,2,2))
+vbKT <- TL~(Linf-Lr)*(1-exp(-K[Stock]*(Age-tr[Stock])))+Lr
+fitKT <- nls(vbKT,data=df2,start=svKT)
+
+svL <- Map(rep,sv0,c(2,1,1))
+vbL <- TL~(Linf[Stock]-Lr)*(1-exp(-K*(Age-tr)))+Lr
+fitL <- nls(vbL,data=df2,start=svL)
+
+svK <- Map(rep,sv0,c(1,2,1))
+vbK <- TL~(Linf-Lr)*(1-exp(-K[Stock]*(Age-tr)))+Lr
+fitK <- nls(vbK,data=df2,start=svK)
+
+svT <- Map(rep,sv0,c(1,1,2))
+vbT <- TL~(Linf-Lr)*(1-exp(-K*(Age-tr[Stock])))+Lr
+fitT <- nls(vbT,data=df2,start=svT)
+
+vb0 <- TL~(Linf-Lr)*(1-exp(-K*(Age-tr)))+Lr
+fit0 <- nls(vb0,data=df2,start=sv0)
+
+## Put together AIC results
+tmp <- aictab(list(fitGen,fitLK,fitLT,fitKT,fitL,fitK,fitT,fit0),
+                 c("$L_{\\infty}$, $K$, $t_{480}$","$L_{\\infty}$, $K$",
+                   "$L_{\\infty}$, $t_{480}$","$K$, $t_{480}$",
+                   "$L_{\\infty}$","$K$","$t_{480}$","None"))
+sumAIC <- data.frame(tmp)[,c("Modnames","K","AICc","Delta_AICc","AICcWt")]
+colnames(sumAIC) <- c("Model","Params","AICc","$\\Delta$AICc","Weight")
+
+## Tables of model coefficients
+tmp <- cbind(coef(fitGen),confint(fitGen))
+colnames(tmp) <- c("Estimate","LCI","UCI")
+res1 <- tmp[c(1,3,5),]
+res2 <- tmp[c(2,4,6),]
+rownames(res1) <- rownames(res2) <- c("$L_{\\infty}$","$K$","$t_{480}$")
+@
+
+
+\begin{frame}[fragile, t]
+\frametitle{Comparing $t_{r}$ Between Groups}
+\begin{itemize}
+  \item Fit all (8) models where all, two, one, or no parameters differed between the two locations (Big Bay de Noc and Green Bay).
+\end{itemize}
+\pause
+\bigskip
+<<echo=FALSE, results="asis">>=
+print(xtable(sumAIC,digits=c(0,0,0,1,2,2)),include.rownames=FALSE,
+      sanitize.text.function=function(x){x},
+      add.to.row=list(pos=list(0:3),command="\\rowcolor{light-gray}"))
+@
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Comparing $t_{r}$ Between Groups}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Big Bay de Noc}
+<<echo=FALSE, results="asis">>=
+print(xtable(res1),sanitize.text.function=function(x){x},
+      add.to.row=list(pos=list(2),command="\\rowcolor{light-gray}"))
+@
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Green Bay}
+<<echo=FALSE, results="asis">>=
+print(xtable(res2),sanitize.text.function=function(x){x},
+      add.to.row=list(pos=list(2),command="\\rowcolor{light-gray}"))
+@
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Comparing $t_{r}$ Between Groups}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Big Bay de Noc}
+<<echo=FALSE, results="asis">>=
+tmp <- matrix(res1[3,],nrow=1)
+rownames(tmp) <- rownames(res1)[3]
+colnames(tmp) <- colnames(res1)
+print(xtable(tmp),sanitize.text.function=function(x){x},
+      add.to.row=list(pos=list(0),command="\\rowcolor{light-gray}"))
+@
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Green Bay}
+<<echo=FALSE, results="asis">>=
+tmp <- matrix(res2[3,],nrow=1)
+rownames(tmp) <- rownames(res2)[3]
+colnames(tmp) <- colnames(res2)
+print(xtable(tmp),sanitize.text.function=function(x){x},
+      add.to.row=list(pos=list(0),command="\\rowcolor{light-gray}"))
+@
+\end{column}
+\end{columns}
+
+<<echo=FALSE, fig.width=3.5, fig.height=3.5, out.width='.45\\linewidth'>>=
+par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+clrs <- c("black","red")
+plot(TL~I(Age-0.05),data=filterD(df2,Stock=="BBN"),pch=16,col=col2rgbt(clrs[1],0.5),
+     xlab="Age",ylab="Total Length (mm)",xlim=c(5,25),ylim=c(330,640),yaxt="n")
+points(TL~I(Age+0.05),data=filterD(df2,Stock=="GreenBay"),pch=16,col=col2rgbt(clrs[2],0.5))
+axis(2,seq(300,700,100))
+axis(1,5:25,NA,tcl=-0.1)
+curve((res1[1,1]-Lr)*(1-exp(-res1[2,1]*(x-res1[3,1])))+Lr,from=0,to=30,
+      lwd=2,col=clrs[1],add=TRUE)
+curve((res2[1,1]-Lr)*(1-exp(-res2[2,1]*(x-res2[3,1])))+Lr,from=0,to=30,
+      lwd=2,col=clrs[2],add=TRUE)
+legend("bottomright",levels(df2$Stock),pch=16,lwd=2,col=clrs,bty="n",cex=0.8)
+abline(h=Lr,lwd=2,col=col2rgbt("blue",0.5),lty=2)
+axis(2,Lr,col="blue",col.axis="blue")
+lines(rep(res1[3,1],2),c(480,0),lwd=2,lty=2,col=clrs[1])
+lines(rep(res2[3,1],2),c(480,0),lwd=2,lty=2,col=clrs[2])
+axis(1,res1[3,1],NA,col=clrs[1],col.axis=clrs[1],lwd=2)
+axis(1,res2[3,1],NA,col=clrs[2],col.axis=clrs[2],lwd=2)
+plotCI(res1[3,1],335,li=res1[3,2],ui=res1[3,3],err="x",pch=NA,col=clrs[1],add=TRUE)
+plotCI(res2[3,1],335,li=res2[3,2],ui=res2[3,3],err="x",pch=NA,col=clrs[2],add=TRUE)
+@
+\end{frame}
+
+
+
+%###############################################################################
+%###############################################################################
+\section{Summary}
+
+\begin{frame}[fragile, t]
+\frametitle{Summary}
+\vspace{-14pt}
+\[\Scale[1.5]{ L_{t} = L_{r} + \left(L_{\infty}-L_{r}\right)\left(1-e^{-K(t-t_{r})}\right) }\]
+\bigskip
+\begin{itemize}
+  \item A simple modification of the VBGF allows direct estimation of a parameter of interest, $t_{r}$.
+  \begin{itemize}
+    \item Same estimates of $L_{\infty}$ and $K$ as with the typical VBGF.
+    \item Same predicted mean lengths-at-age as with the typical VBGF.
+  \end{itemize}
+  \pause
+  \bigskip
+  \item Benefits
+  \begin{itemize}
+    \item Easy interval estimates of $t_{r}$.
+    \item Compare $t_{r}$ between groups with standard (ANCOVA-like) methods.
+  \end{itemize}
+  \pause
+  \smallskip
+  \item Costs
+  \begin{itemize}
+    \item No direct estimate of $t_{0}$ (in the typical VBGF).
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Recommendation}
+\vspace{-14pt}
+\[\Scale[1.5]{ L_{t} = L_{r} + \left(L_{\infty}-L_{r}\right)\left(1-e^{-K(t-t_{r})}\right) } \]
+
+\vspace{0.5in}
+
+\centerline{\begin{minipage}{0.65\textwidth}
+\LARGE Use this modified VBGF in place of the typical VBGF.
+\end{minipage}}
+\end{frame}
+
+
+
+%###############################################################################
+%###############################################################################
+\section*{Acknowledgments}
+\begin{frame}[fragile, t]
+\frametitle{Acknowledgments}
+\begin{itemize}
+  \item Matthew Belnap for collection and initial processing of Whitefish data.
+  \bigskip
+  \item Ben Wegleitner, Zach Kleemann, Andrew Gullickson, and Connie Isermann for help processing Whitefish otoliths.
+  \bigskip
+  \item David Staples (Minnesota DNR) and Joshua McCormick (Oregon Department of Fisheries \& Wildlife) for comments on modified VBGF.
+\end{itemize}
+\end{frame}
+
+
+%###############################################################################
+%###############################################################################
+\section*{Thanks}
+\begin{frame}[plain]
+\end{frame}
+
+
+
+
+%###############################################################################
+%###############################################################################
+\section*{Alternative Explanation}
+
+\begin{frame}[fragile, t]
+\frametitle{Revisit $t_{0}$}
+  \vspace{-6pt}
+  \begin{itemize}
+    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
+  \end{itemize}
+
+<<redefine1, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+par(mar=c(3.5,3.5,0.5,3.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+ages <- seq(-2,15,0.1)
+ex4 <- vbtyp(ages,450,0.2,-1)
+plot(ex4~ages,type="l",lwd=3,ylab="Length",xlab="Age",ylim=c(0,Linf),xlim=c(-2,15))
+# Mark t0 on plot
+points(-1,0,col="blue",pch=19,cex=1,xpd=TRUE)
+axis(1,-1,expression(t[0]),col.axis="blue",cex.axis=1.25,padj=0.3,tick=FALSE)
+# Mark Linf on plot
+abline(h=450,lwd=2,lty=2,col="blue")
+axis(2,450,expression(L[infinity]),cex.axis=1.25,col="blue",col.axis="blue",lwd=2)
+@
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Revisit $t_{0}$}
+  \vspace{-6pt}
+  \begin{itemize}
+    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
+  \end{itemize}
+<<redefine2, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<redefine1>>
+@
+  \begin{itemize}
+    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Revisit $t_{0}$}
+  \vspace{-6pt}
+  \begin{itemize}
+    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
+  \end{itemize}
+<<redefine3, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<redefine2>>
+## Make new axis and mark new values
+Lr <- 250
+axis(2,Lr,expression(L[r]),cex.axis=1.25,col="red",col.axis="red",lwd=2)
+abline(h=Lr,lwd=2,lty=2,col="red")
+axis(4,axTicks(2),axTicks(2)-Lr)
+mtext("Length - Crit. Length",side=4,line=2.1,las=3)
+@
+  \begin{itemize}
+    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Revisit $t_{0}$}
+  \vspace{-6pt}
+  \begin{itemize}
+    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
+  \end{itemize}
+<<redefine4, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<redefine3>>
+axis(4,Lr,0,cex.axis=1.25,col="red",col.axis="red",lwd=2)
+@
+  \begin{itemize}
+    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
+    \item Thus, $Y=0$ means that $L^{*}_{t}=0$, $L_{t}-L_{r}=0$, and $L_{t}=L_{r}$.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Revisit $t_{0}$}
+  \vspace{-6pt}
+  \begin{itemize}
+    \item Recall that $t_{0}$ is the x-intercept (value of $X$ when $Y=0$).
+  \end{itemize}
+<<redefine5, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<redefine4>>
+tr <- calctr(Lr,450,0.2,-1)
+lines(c(tr,tr),c(0,Lr),lwd=2,lty=2,col="red")
+axis(1,tr,expression(t[0]),cex.axis=1.25,col="red",col.axis="red",lwd=2)
+axis(1,tr,expression(t[r]),line=1.5,cex.axis=1.25,col="red",col.axis="red",lwd=2)
+@
+  \begin{itemize}
+    \item Let's define $L^{*}_{t}=L_{t}-L_{r}$ (difference in length from critical length).
+    \item Thus, $Y=0$ means that $L^{*}_{t}=0$, $L_{t}-L_{r}=0$, and $L_{t}=L_{r}$.
+    \item Thus, when using $L^{*}_{t}$, $t_{0} = t_{r}$.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Modified VBGF}
+\begin{itemize}
+  \item Therefore, this simple adjustment allows direction estimation of $t_{r}$.
+\end{itemize}
+
+\[\Scale[1.5]{ L_{t}-L_{r} = L_{\infty}\left(1-e^{-K(t-t_{r})}\right) }\]
+
+\[\Scale[1.5]{ L_{t} = L_{r} + L_{\infty}\left(1-e^{-K(t-t_{r})}\right) }\]
+
+\end{frame}
+
+
+\begin{frame}[fragile, t]
+\frametitle{Modified VBGF}
+\begin{itemize}
+  \item However, $L_{\infty}$ is now incorrect.
+\end{itemize}
+
+<<redefine6, echo=FALSE, fig.width=4.5, fig.height=3.5, out.width='.5\\linewidth'>>=
+<<redefine5>>
+@
+\pause
+\begin{itemize}
+  \item But this is easily corrected.
+\end{itemize}
+
+\[\Scale[1.5]{ L_{t} = L_{r} + \left(L_{\infty}-L_{r}\right)\left(1-e^{-K(t-t_{r})}\right) }\]
+
+\end{frame}
+
+\end{document}

@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{Critical Time Concept}{2}{0}{1}
+\beamer@sectionintoc {2}{Solving for $t_{r}$ by Inverting the VBGF}{12}{0}{2}
+\beamer@sectionintoc {3}{Reparamereterizing the VBGF to Estimate $t_{r}$}{28}{0}{3}
+\beamer@sectionintoc {4}{An Example with Lake Michigan Lake Whitefish}{38}{0}{4}
+\beamer@sectionintoc {5}{Summary}{49}{0}{5}

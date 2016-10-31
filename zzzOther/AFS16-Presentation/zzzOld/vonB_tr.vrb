@@ -1,0 +1,22 @@
+\frametitle{Modified VBGF}
+\begin{itemize}
+  \item However, $L_{\infty}$ is now incorrect.
+\end{itemize}
+
+\begin{knitrout}\footnotesize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}
+
+{\centering \includegraphics[width=.5\linewidth]{Figs/redefine6-1}
+
+}
+
+
+
+\end{knitrout}
+\pause
+\begin{itemize}
+  \item But this is easily corrected.
+\end{itemize}
+
+\[\Scale[1.5]{ L_{t} = L_{r} + \left(L_{\infty}-L_{r}\right)\left(1-e^{-K(t-t_{r})}\right) }\]
+
