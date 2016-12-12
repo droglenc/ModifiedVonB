@@ -34,6 +34,10 @@
 library(FSA)
 library(nlstools)
 library(plotrix)
+library(AICcmodavg)
+
+## Should figures be PDFs (TRUE) or JPEGs (FALSE)
+PDFfigs <- FALSE
 
 ## Set random number seed so that bootstrappings are repeatable
 set.seed(347834)
@@ -66,7 +70,9 @@ calc_trO <- function(Lr,Linf,K=NULL,L0=NULL) {
 ################################################################################
 ## Figure 1
 ################################################################################
-pdf("results/Figure_1.PDF",width=4,height=4)
+if (PDFfigs) { pdf("results/Figure_1.PDF",width=4,height=4)
+} else { jpeg("results/Figure1.JPEG",width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
+}
 par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 Linf <- 250; t0 <- -0.7; K <- 0.5
 curve(vbnew(x,Linf,K,t0,0),from=-1,to=5,lwd=3,
@@ -250,7 +256,9 @@ summary(fitLTr,correlation=TRUE)
 ( resLTr <- rbind(cbind(Ests=coef(fitLTr),confint(fitLTr))) )
 
 ## Figure 2
-pdf("results/Figure_2.PDF",width=4,height=4)
+if (PDFfigs) { pdf("results/Figure_2.PDF",width=4,height=4)
+} else { jpeg("results/Figure2.JPEG",width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
+}
 par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 jit <- 0.1; pt.cex <- 0.8; clr <- col2rgbt("black",1/2)
 ltys <- 3:2; pchs <- 0:1; sfrac <- 0.005; slwd=0.7
