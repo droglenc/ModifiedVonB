@@ -5,8 +5,12 @@
 ##   Research XX:XXX-XXX.
 ##
 ## Need to be patient with bootstrapping functions.
-## Expected that data files are in a "data" directory within ghe current
-##   working directory.
+## Expects that data files are in a "data" directory within the current
+##   working directory. Data files (LMWhitefish_byStock.csv and WBGWalleye.csv)
+##   are available at (make sure to download the RAW files)
+##   https://raw.githubusercontent.com/droglenc/ModifiedVonB/master/data/LMWhitefish_byStock.csv
+##   https://raw.githubusercontent.com/droglenc/ModifiedVonB/master/data/WBGWalleye.csv
+##
 ## May need to create a directory called "results" in your current working
 ##   directory to hold the figures produced by pdf() (or not run the pdf()
 ##   and dev.off() functions to simply produce the figures on the local device).
@@ -201,7 +205,7 @@ round(cbind(coef(fitN),coef(fitN1),coef(fitN2),coef(fitN3)),3)    # OK
 
 ################################################################################
 ################################################################################
-## Lake Winnibigoshis Walleye analysis to compare sexes within a year
+## Lake Winnibigoshish Walleye analysis to compare sexes within a year
 ##
 ##   1. Fit all models
 ##   2. Assess support for each model
