@@ -1,7 +1,8 @@
 ################################################################################
 ################################################################################
 ##
-## Analysis script for ... Ogle, DH.  201X.  .  Fisheries
+## Analysis script for ... Ogle DH, Isermann DA. 2017. Estimating age at a 
+##   specified length from the von Bertalanffy growth function.  Fisheries
 ##   Research XX:XXX-XXX.
 ##
 ## Need to be patient with bootstrapping functions.
@@ -11,11 +12,10 @@
 ##   https://raw.githubusercontent.com/droglenc/ModifiedVonB/master/data/LMWhitefish_byStock.csv
 ##   https://raw.githubusercontent.com/droglenc/ModifiedVonB/master/data/WBGWalleye.csv
 ##
-## May need to create a directory called "results" in your current working
-##   directory to hold the figures produced by pdf() (or not run the pdf()
-##   and dev.off() functions to simply produce the figures on the local device).
-##   Could use (in R) to create the directory (assumes that you have set your
-##   working directory to the same location as this script) ...
+## Need to create a directory called "results" in your current working
+##   directory to hold the figures produced by pdf() or jpeg(). Could use (in R)
+##   to create the directory (assumes that you have set your working directory
+##   to the same location as this script) ...
 ##
 ##   dir.create("results")
 ##
@@ -34,6 +34,10 @@
 ##   install.packages("FSA")
 ##
 ################################################################################
+## Clear the console and global environment
+cat("\014")     # or ctrl-L in RStudio
+rm(list = ls())
+
 ## Load required packages
 library(FSA)
 library(nlstools)
@@ -167,10 +171,9 @@ resN <- rbind(cbind(Ests=coef(fitN,Lr),confint(bootN,conf.level=cl)),
               RSS=c(sum(residuals(fitN)^2),NA,NA))
 rownames(resN)[4:5] <- c(paste0("pred",ages))
 
-round(resT,4)
-round(resO,4)
-round(resN,4)
-aictab(list(fitT,fitO,fitN),c("Typical","Original","New"))
+round(resT,3)
+round(resO,3)
+round(resN,3)
 
 # Alternative starting values .. Just checking for convergence and relationship
 #   to parameter estimates from the fits above.
