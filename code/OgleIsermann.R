@@ -2,8 +2,8 @@
 ################################################################################
 ##
 ## Analysis script for ... Ogle DH, Isermann DA. 2017. Estimating age at a 
-##   specified length from the von Bertalanffy growth function.  Fisheries
-##   Research XX:XXX-XXX.
+##   specified length from the von Bertalanffy growth function.  North
+##   American Journal of Fisheries Management XX:XXX-XXX.
 ##
 ## Need to be patient with bootstrapping functions.
 ## Expects that data files are in a "data" directory within the current
@@ -13,8 +13,8 @@
 ##   https://raw.githubusercontent.com/droglenc/ModifiedVonB/master/data/WBGWalleye.csv
 ##
 ## Need to create a directory called "results" in your current working
-##   directory to hold the figures produced by pdf() or jpeg(). Could use (in R)
-##   to create the directory (assumes that you have set your working directory
+##   directory to hold the produced figures. Could use (in R) to create
+##   the directory (assumes that you have set your working directory
 ##   to the same location as this script) ...
 ##
 ##   dir.create("results")
@@ -28,24 +28,29 @@
 
 ################################################################################
 ## SETUP
-## 
-## Requires FSA (>=0.8.11) from CRAN, installed with:
-##
-##   install.packages("FSA")
-##
 ################################################################################
 ## Clear the console and global environment
 cat("\014")     # or ctrl-L in RStudio
 rm(list = ls())
 
 ## Load required packages
+## If not previously installed then use the following commented line -- note
+## though that you may have to set a CRAN mirror.
+##   install.packages(c("FSA","nlstools","plotrix","AICcmodavg"))
 library(FSA)
 library(nlstools)
 library(plotrix)
 library(AICcmodavg)
 
-## Should figures be PDFs (TRUE) or JPEGs (FALSE)
-PDFfigs <- FALSE
+## Which type to make ... varies among journal submissions (tiff for NAJFM)
+ptype <- c("PDF","JPG","TIFF")[3]
+# these are used to use the arial font in the PDF version of the figures
+if (ptype=="JPG") {
+  library(extrafont)
+  # run this (uncomment once) the first time you use library(extrafont)
+  #font_import()
+}
+
 
 ## Set random number seed so that bootstrappings are repeatable
 set.seed(347834)
@@ -78,9 +83,13 @@ calc_trO <- function(Lr,Linf,K=NULL,L0=NULL) {
 ################################################################################
 ## Figure 1
 ################################################################################
-if (PDFfigs) { pdf("results/Figure_1.PDF",width=4,height=4)
-} else { jpeg("results/Figure1.JPEG",width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
-}
+fig1 <- "results/Figure_1"
+if (ptype=="JPG") {
+  jpeg(paste0(fig1,".jpg"),width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
+} else if (ptype=="PDF") {
+  pdf(paste0(fig1,".pdf"),width=4,height=4,family="Arial",pointsize=14)
+} else tiff(paste0(fig1,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
+
 par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 Linf <- 250; t0 <- -0.7; K <- 0.5
 curve(vbnew(x,Linf,K,t0,0),from=-1,to=5,lwd=3,
@@ -263,9 +272,13 @@ summary(fitLTr,correlation=TRUE)
 ( resLTr <- rbind(cbind(Ests=coef(fitLTr),confint(fitLTr))) )
 
 ## Figure 2
-if (PDFfigs) { pdf("results/Figure_2.PDF",width=4,height=4)
-} else { jpeg("results/Figure2.JPEG",width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
-}
+fig2 <- "results/Figure_2"
+if (ptype=="JPG") {
+  jpeg(paste0(fig2,".jpg"),width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
+} else if (ptype=="PDF") {
+  pdf(paste0(fig2,".pdf"),width=4,height=4,family="Arial",pointsize=14)
+} else tiff(paste0(fig2,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
+
 par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 jit <- 0.1; pt.cex <- 0.8; clr <- col2rgbt("black",1/2)
 ltys <- 3:2; pchs <- 0:1; sfrac <- 0.005; slwd=0.7
