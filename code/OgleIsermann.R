@@ -1,56 +1,42 @@
-################################################################################
-################################################################################
+########################################################################
+########################################################################
 ##
-## Analysis script for ... Ogle DH, Isermann DA. 2017. Estimating age at a 
-##   specified length from the von Bertalanffy growth function.  North
-##   American Journal of Fisheries Management XX:XXX-XXX.
-##
-## Need to be patient with bootstrapping functions.
 ## Expects that data files are in a "data" directory within the current
-##   working directory. Data files (LMWhitefish_byStock.csv and WBGWalleye.csv)
-##   are available at (make sure to download the RAW files)
-##   https://raw.githubusercontent.com/droglenc/ModifiedVonB/master/data/LMWhitefish_byStock.csv
-##   https://raw.githubusercontent.com/droglenc/ModifiedVonB/master/data/WBGWalleye.csv
+##   working directory. The LMWhitefish_byStock.csv data file is 
+##   available at http://tinyurl.com/y82jxm84 and the WBGWalleye.csv
+##   data file is available at http://tinyurl.com/y93z5jnz.
 ##
 ## Need to create a directory called "results" in your current working
-##   directory to hold the produced figures. Could use (in R) to create
-##   the directory (assumes that you have set your working directory
-##   to the same location as this script) ...
+##   directory to hold the produced figures. Create (using R) this
+##   directory (assumes that you have set your working directory
+##   to the same location as this script) with 
 ##
 ##   dir.create("results")
 ##
-## This code was tested on a Windows 7 machine using 32-bit R v3.3.1 and a
-##   Macintosh (El Capitan OS) machine using 64-bit R v3.3.1.  The code runs
-##   without error on both machines.
+## This code was tested on a Windows 7 machine using 32-bit R v3.4.0.
 ##
-################################################################################
-################################################################################
+## Need to be patient with bootstrapping functions.
+##
+########################################################################
+########################################################################
 
-################################################################################
+
+########################################################################
+########################################################################
 ## SETUP
-################################################################################
+########################################################################
 ## Clear the console and global environment
 cat("\014")     # or ctrl-L in RStudio
 rm(list = ls())
 
 ## Load required packages
-## If not previously installed then use the following commented line -- note
-## though that you may have to set a CRAN mirror.
+## If not previously installed, then use (you may have to set a CRAN
+## mirror first) the following commented code.
 ##   install.packages(c("FSA","nlstools","plotrix","AICcmodavg"))
 library(FSA)
 library(nlstools)
 library(plotrix)
 library(AICcmodavg)
-
-## Which type to make ... varies among journal submissions (tiff for NAJFM)
-ptype <- c("PDF","JPG","TIFF")[3]
-# these are used to use the arial font in the PDF version of the figures
-if (ptype=="JPG") {
-  library(extrafont)
-  # run this (uncomment once) the first time you use library(extrafont)
-  #font_import()
-}
-
 
 ## Set random number seed so that bootstrappings are repeatable
 set.seed(347834)
@@ -79,26 +65,25 @@ calc_trO <- function(Lr,Linf,K=NULL,L0=NULL) {
 }
 
 
-################################################################################
-################################################################################
+########################################################################
+########################################################################
 ## Figure 1
-################################################################################
-fig1 <- "results/Figure_1"
-if (ptype=="JPG") {
-  jpeg(paste0(fig1,".jpg"),width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
-} else if (ptype=="PDF") {
-  pdf(paste0(fig1,".pdf"),width=4,height=4,family="Arial",pointsize=14)
-} else tiff(paste0(fig1,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
+########################################################################
+tiff("results/Figure_1.tif",width=3.5,height=3.5,units="in",
+     pointsize=10,family="sans",res=300)
+par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,
+    xaxs="i",yaxs="i")
 
-par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
 Linf <- 250; t0 <- -0.7; K <- 0.5
 curve(vbnew(x,Linf,K,t0,0),from=-1,to=5,lwd=3,
-      ylab="Length",xlab="Age",ylim=c(0,1.05*Linf),xlim=c(-1,5),yaxt="n",xaxt="n")
+      ylab="Length (mm)",xlab="Age (years)",
+      ylim=c(0,1.05*Linf),xlim=c(-1,5),yaxt="n",xaxt="n")
 axis(1,-1:5,c(NA,0:5))
 axis(2,seq(0,250,50),c(0,NA,100,NA,200,NA))
 # Mark Linf on plot
 abline(h=Linf,lwd=2,lty=2,col="gray50")
-axis(2,Linf,expression(italic(L)[infinity]),cex.axis=1.25,lwd=2,tick=FALSE)
+axis(2,Linf,expression(italic(L)[infinity]),cex.axis=1.25,lwd=2,
+     tick=FALSE)
 # Mark t0 on plot
 axis(1,t0,expression(italic(t)[0]),cex.axis=1.25,padj=0.3,tick=FALSE)
 points(t0,0,cex=1.2,xpd=TRUE,pch=21,col="black",bg="gray80")
@@ -119,8 +104,8 @@ points(tr,Lr,cex=1.2,xpd=TRUE,pch=21,col="black",bg="gray80")
 dev.off()
 
 
-################################################################################
-################################################################################
+########################################################################
+########################################################################
 ## Big Bay de Noc analysis
 ##
 ##   1. Fit all models
@@ -129,8 +114,7 @@ dev.off()
 ##   4. Make summary table to show equivalencies
 ##   5. Assessed alternative starting values
 ##
-################################################################################
-
+########################################################################
 ## Load data ... and isolate BBN
 df <- read.csv("data/LMWhitefish_byStock.csv")
 bbn <- droplevels(subset(df,Stock=="BBN"))
@@ -184,8 +168,8 @@ round(resT,3)
 round(resO,3)
 round(resN,3)
 
-# Alternative starting values .. Just checking for convergence and relationship
-#   to parameter estimates from the fits above.
+# Alternative starting values .. Just checking for convergence and
+#   relationship to parameter estimates from the fits above.
 svT1 <- list(Linf=700,K=0.2,t0=-2)
 fitT1 <- nls(Len~vbT(Age,Linf,K,t0),data=bbn,start=svT1)
 svT2 <- list(Linf=400,K=0.5,t0=2)
@@ -211,12 +195,8 @@ fitN3 <- nls(Len~vbnew(Age,Linf,K,tr,Lr),data=bbn,start=svN3)
 round(cbind(coef(fitN),coef(fitN1),coef(fitN2),coef(fitN3)),3)    # OK
 
 
-
-
-
-
-################################################################################
-################################################################################
+########################################################################
+########################################################################
 ## Lake Winnibigoshish Walleye analysis to compare sexes within a year
 ##
 ##   1. Fit all models
@@ -224,8 +204,7 @@ round(cbind(coef(fitN),coef(fitN1),coef(fitN2),coef(fitN3)),3)    # OK
 ##   3. Make summary table
 ##   4. Make summary graphics
 ##
-################################################################################
-
+########################################################################
 # Load data
 df <- read.csv("data/WBGWalleye.csv",na.strings=".")
 wae12 <- droplevels(subset(df,Year==2012 & !is.na(Sex)))
@@ -266,20 +245,17 @@ fitTr   <- nls(vbTr,  data=wae12,start=svTr)
 extraSS(fitOm,com=fitLKTr,sim.name="{Omega}",com.name="{L,K,tr}")
 extraSS(fitLK,fitLTr,fitKTr,sim.name=c("{Linf,K}","{Linf,tr}","{K,tr}"),
         com=fitLKTr,com.name="{Linf,K,tr}")
-extraSS(fitL,fitTr,sim.name=c("{Linf}","{tr}"),com=fitLTr,com.name="{Linf,tr}")
+extraSS(fitL,fitTr,sim.name=c("{Linf}","{tr}"),
+        com=fitLTr,com.name="{Linf,tr}")
 
 summary(fitLTr,correlation=TRUE)
 ( resLTr <- rbind(cbind(Ests=coef(fitLTr),confint(fitLTr))) )
 
 ## Figure 2
-fig2 <- "results/Figure_2"
-if (ptype=="JPG") {
-  jpeg(paste0(fig2,".jpg"),width=5,height=5,units="in",pointsize=14,family="sans",quality=100,res=144)
-} else if (ptype=="PDF") {
-  pdf(paste0(fig2,".pdf"),width=4,height=4,family="Arial",pointsize=14)
-} else tiff(paste0(fig2,".tif"),width=3.5,height=3.5,units="in",pointsize=10,family="sans",res=300)
-
-par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,xaxs="i",yaxs="i")
+tiff("results/Figure_2.tif",width=3.5,height=3.5,units="in",
+     pointsize=10,family="sans",res=300)
+par(mar=c(3.5,3.5,0.5,0.5),mgp=c(2.1,0.4,0),tcl=-0.2,las=1,
+    xaxs="i",yaxs="i")
 jit <- 0.1; pt.cex <- 0.8; clr <- col2rgbt("black",1/2)
 ltys <- 3:2; pchs <- 0:1; sfrac <- 0.005; slwd=0.7
 # base plot
@@ -290,8 +266,10 @@ axis(1,0:13,NA,tcl=-0.1)
 axis(2,Lr,expression(italic(L)[r]))
 abline(h=Lr,col="gray90")
 # show points
-points(TL~I(Age-jit),data=subset(wae12,Sex=="F"),pch=pchs[1],col=clr,cex=pt.cex^2)
-points(TL~I(Age+jit),data=subset(wae12,Sex=="M"),pch=pchs[2],col=clr,cex=pt.cex)
+points(TL~I(Age-jit),data=subset(wae12,Sex=="F"),pch=pchs[1],
+       col=clr,cex=pt.cex^2)
+points(TL~I(Age+jit),data=subset(wae12,Sex=="M"),pch=pchs[2],
+       col=clr,cex=pt.cex)
 # show best-fit lines
 curve(vbnew(x,c(coef(fitLTr)[c(1,3,4)],Lr)),from=0,to=18,add=TRUE,
       lwd=2,lty=ltys[1])
